@@ -1,5 +1,6 @@
 import requests
 from datetime import datetime
+from requests.exceptions import HTTPError
 
 ISS_BASE_URL = "http://api.open-notify.org"
 ISS_POSITION_ENDPOINT = f"{ISS_BASE_URL}/iss-now.json"
@@ -9,15 +10,36 @@ def fetch_iss_data():
     """
     Fetches raw ISS position and timestamp datas from the API
     """
-    response_iss = requests.get(ISS_POSITION_ENDPOINT)
-    return response_iss.json()
+    try:
+        response_iss = requests.get(ISS_POSITION_ENDPOINT, timeout=5)
+        response_iss.raise_for_status()
+        print("Sucess:", response_iss.json())
+        return response_iss.json()
+    
+    except HTTPError as http_err:
+        print(f"HTTP error ocurred: {http_err}")
+        return None
+    except Exception as err:
+        print(f"Other error ocurred: {err}")
+        return None
 
 def fetch_astronauts_data():
     """
     Fetches raw astronauts data from the API
     """
-    response_astronauts = requests.get(ASTRONAUTS_ENDPOINT)
-    return response_astronauts.json()
+    try:
+        response_astronauts = requests.get(ASTRONAUTS_ENDPOINT)
+        response_astronauts.raise_for_status()
+        print("Sucess:", response_astronauts.json())
+        return response_astronauts.json()
+    
+    except HTTPError as http_err:
+        print(f"HTTP error ocurred: {http_err}")
+        return None
+    except Exception as err:
+        print(f"Other error ocurred: {err}")
+        return None
+
 
 def get_iss_position(iss_data):
     """
