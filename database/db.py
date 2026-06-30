@@ -28,9 +28,8 @@ def insert_record(data):
     cursor.execute("""
         INSERT INTO registros (timestamp, latitude, longitude, country, temp, feels_like, humidity, condition_main, wind_speed)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        data["timestamp"], data["latitude"], data["longitude"], data["country"],
-        data["temp"], data["feels_like"], data["humidity"], data["condition_main"], data["wind_speed"]
-    ))
+    """, data)
+        # data["timestamp"], data["latitude"], data["longitude"], data["country"],
+        # data["temp"], data["feels_like"], data["humidity"], data["condition_main"], data["wind_speed"]
     conn.commit()
     conn.close()
