@@ -1,0 +1,4 @@
+[polling]
+interval_minutes = 5
+max_retries = 3
+retry_wait_seconds = 10
