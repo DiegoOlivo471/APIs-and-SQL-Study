@@ -2,7 +2,15 @@ import sys
 from iss.iss import fetch_iss_data, get_iss_position, get_iss_timestamp
 from weather.weather import fetch_weather_data, get_weather_summary
 from database.db import create_table, insert_record
-import time 
+import time
+import tomllib
+
+with open("config.toml", "rb") as f:
+    config = tomllib.load(f)
+
+INTERVAL = config["polling"]["interval_minutes"] * 60
+MAX_RETRIES = config["polling"]["max_retries"]
+RETRY_WAIT = config["polling"]["retry_wait_seconds"]
 
 tries_iss = 0
 tries_weather = 0
@@ -13,11 +21,11 @@ while True:
         if iss_data is not None:
             break
         tries_iss += 1
-        if tries_iss >= 3:
+        if tries_iss >= MAX_RETRIES:
             print("Could not fetch ISS data after 3 tries.")
             sys.exit(1)
-        print(f"Retrying to fetch ISS data... ({tries_iss}/3)")
-        time.sleep(10)  # Waits 10 seconds and try again, maximum of 3 tries before quitting.
+        print(f"Retrying to fetch ISS data... ({tries_iss}/{MAX_RETRIES})")
+        time.sleep(RETRY_WAIT)  # Waits 10 seconds and try again, maximum of 3 tries before quitting.
     tries_iss = 0
     
     iss_data_timestamp = get_iss_timestamp(iss_data)
@@ -28,11 +36,11 @@ while True:
         if weather_data is not None:
             break
         tries_weather += 1
-        if tries_weather >= 3:
+        if tries_weather >= MAX_RETRIES:
             print("Could not fetch OpenWeatherMap data after 3 tries.")
             sys.exit(1)
-        print(f"Retrying to fetch OpenWeatherMap data... ({tries_weather}/3)")
-        time.sleep(10)
+        print(f"Retrying to fetch OpenWeatherMap data... ({tries_weather}/{MAX_RETRIES})")
+        time.sleep(RETRY_WAIT)
     tries_weather = 0
 
     summ = get_weather_summary(weather_data)
@@ -52,4 +60,4 @@ while True:
     create_table()
     insert_record(values)
 
-    time.sleep(300)  # Waits 5 minutes for the next requests.
+    time.sleep(INTERVAL)  # Waits a certain period for the next requests.
